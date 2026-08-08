@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Prime Car Center — Workshop Records</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1b1f24">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#1b1f24;
+    --charcoal-2:#262b33;
+    --charcoal-3:#323844;
+    --steel:#3a6690;
+    --steel-light:#5487b3;
+    --hazard:#e8590c;
+    --hazard-dark:#c94a08;
+    --paper:#f6f5f2;
+    --paper-2:#ffffff;
+    --ink:#1b1f24;
+    --ink-soft:#5b6570;
+    --line:#d8d3c9;
+    --success:#2f9e44;
+    --danger:#c92a2a;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0;}
+  html,body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:none;
+  }
+  h1,h2,h3,.display{font-family:'Oswald',sans-serif; letter-spacing:.02em;}
+  .mono{font-family:'Roboto Mono',monospace;}
+
+  /* ===== HEADER ===== */
+  header.app-header{
+    background:var(--charcoal);
+    color:#fff;
+    padding:16px 28px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    border-bottom:4px solid var(--hazard);
+    position:sticky; top:0; z-index:50;
+  }
+  .badge{
+    width:56px;height:56px;
+    position:relative;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .badge svg{width:100%;height:100%;}
+  .badge-text{
+    position:absolute;
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:.03em;
+    color:#1b1f24;
+  }
+  .header-titles h1{
+    margin:0; font-size:22px; text-transform:uppercase; font-weight:700; color:#fff;
+  }
+  .header-titles p{
+    margin:2px 0 0; font-size:12.5px; color:#b9c2cc; font-family:'Inter',sans-serif; letter-spacing:.03em;
+  }
+
+  /* ===== NAV ===== */
+  nav.tabs{
+    display:flex;
+    background:var(--charcoal-2);
+    padding:0 24px;
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    display:flex; align-items:center; gap:8px;
+    background:none;border:none;color:#c3cad2;
+    font-family:'Oswald',sans-serif;
+    font-size:14px; letter-spacing:.04em; text-transform:uppercase;
+    padding:14px 20px; cursor:pointer;
+    border-bottom:3px solid transparent;
+    white-space:nowrap;
+  }
+  nav.tabs button:hover{color:#fff;}
+  nav.tabs button.active{
+    color:#fff;
+    border-bottom:3px solid var(--hazard);
+  }
+  nav.tabs .tab-icon{width:18px; height:18px; flex-shrink:0;}
+
+  main{max-width:1180px;margin:0 auto;padding:28px 24px 80px;}
+  .view{display:none;}
+  .view.active{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  /* ===== MOBILE APP LAYOUT ===== */
+  @media(max-width:760px){
+    header.app-header{padding:12px 16px; gap:12px;}
+    .badge{width:42px;height:42px;}
+    .badge-text{font-size:12px;}
+    .header-titles h1{font-size:16.5px;}
+    .header-titles p{font-size:10.5px;}
+
+    nav.tabs{
+      position:fixed; top:auto; bottom:0; left:0; right:0;
+      justify-content:space-around;
+      padding:5px 4px calc(6px + env(safe-area-inset-bottom));
+      overflow-x:visible;
+      box-shadow:0 -6px 18px rgba(0,0,0,.28);
+      z-index:60;
+    }
+    nav.tabs button{
+      flex-direction:column; gap:3px;
+      padding:6px 2px; font-size:9.5px;
+      flex:1; min-width:0;
+      border-bottom:none; border-radius:10px;
+    }
+    nav.tabs button span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+    nav.tabs button.active{background:rgba(232,89,12,.14); color:var(--hazard);}
+    nav.tabs .tab-icon{width:21px; height:21px;}
+
+    main{padding:16px 12px calc(88px + env(safe-area-inset-bottom));}
+  }
+
+  .panel{
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px;
+    margin-bottom:20px;
+  }
+  .panel h2{
+    margin:0 0 16px;
+    font-size:17px;
+    text-transform:uppercase;
+    display:flex;align-items:center;gap:10px;
+  }
+  .panel h2::before{
+    content:"";
+    width:4px;height:18px;
+    background:var(--hazard);
+    display:inline-block;
+    border-radius:2px;
+  }
+
+  .grid-2{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;}
+  @media(max-width:860px){.grid-2{grid-template-columns:1fr;}}
+
+  /* ===== CAMERA ===== */
+  .cam-wrap{
+    position:relative;
+    background:#000;
+    border-radius:8px;
+    overflow:hidden;
+    aspect-ratio:4/3;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .cam-wrap video, .cam-wrap canvas, .cam-wrap img{
+    width:100%;height:100%;object-fit:cover;display:block;
+  }
+  .cam-placeholder{color:#8a94a0; font-size:13px; text-align:center; padding:20px; font-family:'Inter',sans-serif;}
+  .live-stamp{
+    position:absolute; left:10px; bottom:10px;
+    background:rgba(0,0,0,.55);
+    color:#fff;
+    font-family:'Roboto Mono',monospace;
+    font-size:12.5px;
+    padding:5px 9px;
+    border-radius:5px;
+    border-left:3px solid var(--hazard);
+    letter-spacing:.02em;
+  }
+  .cam-actions{display:flex;gap:10px;margin-top:12px;}
+
+  /* ===== FORM ===== */
+  label{
+    display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:.03em; margin:14px 0 6px;
+  }
+  label:first-child{margin-top:0;}
+  input[type=text], input[type=number], input[type=date], textarea, select{
+    width:100%; padding:10px 12px;
+    border:1px solid var(--line); border-radius:6px;
+    font-family:'Inter',sans-serif; font-size:14.5px;
+    background:#fdfdfc; color:var(--ink);
+  }
+  input.mono-input{font-family:'Roboto Mono',monospace; letter-spacing:.05em;}
+  textarea{resize:vertical; min-height:70px;}
+  input:focus, textarea:focus, select:focus{outline:2px solid var(--steel-light); outline-offset:1px; border-color:var(--steel);}
+
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .total-line{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:16px; padding-top:14px; border-top:1px dashed var(--line);
+    font-family:'Oswald',sans-serif; font-size:16px; text-transform:uppercase;
+  }
+  .total-line span.amt{font-family:'Roboto Mono',monospace; font-size:20px; color:var(--hazard-dark); font-weight:700;}
+
+  /* ===== BUTTONS ===== */
+  .btn{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:'Oswald',sans-serif; font-size:13.5px; text-transform:uppercase; letter-spacing:.03em;
+    padding:10px 18px; border-radius:6px; border:none; cursor:pointer;
+    background:var(--steel); color:#fff;
+  }
+  .btn:hover{background:var(--steel-light);}
+  .btn.primary{background:var(--hazard);}
+  .btn.primary:hover{background:var(--hazard-dark);}
+  .btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line);}
+  .btn.ghost:hover{background:#f0efec;}
+  .btn.danger{background:var(--danger);}
+  .btn.danger:hover{background:#a41f1f;}
+  .btn.small{padding:6px 11px; font-size:12px;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+
+  /* ===== SEARCH BAR ===== */
+  .search-bar{
+    display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;
+    background:#f0efe9; border:1px solid var(--line); border-radius:8px;
+    padding:14px 16px; margin-bottom:18px;
+  }
+  .search-bar .field{min-width:150px;}
+  .search-bar label{margin:0 0 5px;}
+
+  /* ===== TABLE ===== */
+  table{width:100%; border-collapse:collapse; font-size:13.8px;}
+  thead th{
+    text-align:left; font-family:'Oswald',sans-serif; text-transform:uppercase;
+    font-size:11.5px; letter-spacing:.04em; color:var(--ink-soft);
+    padding:9px 10px; border-bottom:2px solid var(--charcoal);
+  }
+  tbody td{padding:10px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  tbody tr:hover{background:#faf9f6;}
+  .thumb{width:46px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--line);}
+  .plate-chip{
+    font-family:'Roboto Mono',monospace; font-weight:700; letter-spacing:.06em;
+    background:#fff; border:2px solid var(--charcoal); border-radius:4px;
+    padding:3px 8px; display:inline-block; font-size:12.5px;
+  }
+  .empty-row td{text-align:center; padding:34px 10px; color:var(--ink-soft); font-style:italic;}
+
+  @media(max-width:700px){
+    table, thead, tbody, tr, th, td{display:block; width:100%;}
+    thead{display:none;}
+    tbody tr{
+      background:#fff; border:1px solid var(--line); border-radius:10px;
+      margin-bottom:12px; padding:4px 12px;
+    }
+    tbody tr:hover{background:#fff;}
+    tbody td{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      border-bottom:1px solid #f0efe9; padding:9px 0; text-align:right;
+    }
+    tbody td:last-child{border-bottom:none;}
+    tbody td[data-label]::before{
+      content:attr(data-label);
+      font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:10.5px;
+      color:var(--ink-soft); letter-spacing:.03em; text-align:left; flex-shrink:0;
+    }
+    tbody td.cell-photo{justify-content:center; padding:10px 0;}
+    tbody td.cell-photo::before{content:none;}
+    tbody td.cell-actions{justify-content:center; padding:10px 0;}
+    tbody td.cell-actions::before{content:none;}
+    .thumb{width:64px;height:50px;}
+    .empty-row{border:none !important; background:none !important;}
+    .empty-row td{display:block; text-align:center; border-bottom:none;}
+    .empty-row td::before{content:none;}
+  }
+
+  /* ===== SUMMARY CARDS ===== */
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:20px;}
+  .card{
+    background:var(--charcoal); color:#fff; border-radius:8px; padding:16px 18px;
+    border-bottom:3px solid var(--hazard);
+  }
+  .card.pos{border-bottom-color:var(--success);}
+  .card.neg{border-bottom-color:var(--danger);}
+  .card .label{font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#aab4bf;}
+  .card .value{font-family:'Roboto Mono',monospace; font-size:22px; font-weight:700; margin-top:5px;}
+
+  .export-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
+
+  /* ===== MODAL / INVOICE PREVIEW ===== */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,22,26,.6);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal-box{
+    background:#fff; border-radius:10px; max-width:480px; width:100%;
+    max-height:88vh; overflow-y:auto; padding:22px;
+  }
+  .modal-box h3{margin-top:0;}
+  .modal-close{float:right; background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink-soft);}
+
+  @media(max-width:700px){
+    .modal-overlay{align-items:flex-end; padding:0;}
+    .modal-box{
+      max-width:100%; width:100%; border-radius:16px 16px 0 0;
+      max-height:92vh; padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+    }
+    .modal-box::before{
+      content:""; display:block; width:40px; height:4px; background:var(--line);
+      border-radius:3px; margin:0 auto 14px;
+    }
+  }
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+    background:var(--charcoal); color:#fff; padding:11px 20px; border-radius:7px;
+    font-size:13.5px; box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0; pointer-events:none; transition:opacity .25s, bottom .25s; z-index:200;
+    border-left:4px solid var(--hazard);
+  }
+  .toast.show{opacity:1; bottom:32px;}
+
+  .hint{font-size:12px; color:var(--ink-soft); margin-top:6px;}
+  .checkbox-line{display:flex; align-items:center; gap:8px; margin-top:12px; font-size:13px; color:var(--ink-soft);}
+  .checkbox-line input{width:auto;}
+
+  /* ===== PARTS LIST ===== */
+  .parts-box{border:1px solid var(--line); border-radius:8px; padding:12px; background:#faf9f6;}
+  .part-row{display:grid; grid-template-columns:1fr 120px 34px; gap:8px; margin-bottom:8px; align-items:center;}
+  .part-row:last-child{margin-bottom:0;}
+  .part-row input{padding:8px 10px; font-size:13.5px;}
+  .btn-remove-part{
+    width:34px; height:34px; border:1px solid var(--line); background:#fff; color:var(--danger);
+    border-radius:6px; cursor:pointer; font-size:16px; line-height:1;
+  }
+  .btn-remove-part:hover{background:#fdecec;}
+  .parts-subtotal{
+    display:flex; justify-content:space-between; margin-top:10px; padding-top:10px;
+    border-top:1px dashed var(--line); font-size:13px; color:var(--ink-soft);
+  }
+  .parts-subtotal b{color:var(--ink); font-family:'Roboto Mono',monospace;}
+
+  /* ===== SETTINGS ===== */
+  .settings-note{font-size:12px; color:var(--ink-soft); margin-top:-8px; margin-bottom:14px;}
+
+  @media(max-width:700px){
+    .panel{padding:16px; border-radius:12px; margin-bottom:14px;}
+    .panel h2{font-size:15px;}
+    .grid-2{gap:14px;}
+    .row-2{grid-template-columns:1fr; gap:0;}
+    .btn{min-height:44px; font-size:13px;}
+    .cam-actions{flex-direction:column;}
+    .cam-actions .btn{width:100%; justify-content:center;}
+    .export-row{flex-direction:column;}
+    .export-row .btn{width:100%; justify-content:center;}
+    .search-bar{flex-direction:column; align-items:stretch; padding:12px;}
+    .search-bar .field{min-width:0; width:100%;}
+    .search-bar .field .btn{width:100%; justify-content:center;}
+    .cards{grid-template-columns:1fr 1fr; gap:10px;}
+    .card{padding:13px 14px;}
+    .card .value{font-size:19px;}
+    .part-row{grid-template-columns:1fr 84px 34px; gap:6px;}
+  }
+  @media(max-width:420px){
+    .cards{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="badge">
+    <svg viewBox="0 0 100 100"><polygon points="50,3 93,26 93,74 50,97 7,74 7,26" fill="#e8590c" stroke="#1b1f24" stroke-width="4"/></svg>
+    <span class="badge-text">PCC</span>
+  </div>
+  <div class="header-titles">
+    <h1>Prime Car Center</h1>
+    <p>Workshop Job Records &amp; Invoicing</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="entry">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.3"/></svg>
+    <span>New Entry</span>
+  </button>
+  <button class="tab-btn" data-tab="records">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v2H9z"/><path d="M8 10.5h8M8 14h8M8 17.5h5"/></svg>
+    <span>Job Records</span>
+  </button>
+  <button class="tab-btn" data-tab="expenses">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.3L14 21l-2-1.3L10 21l-2-1.3L6 21z"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>
+    <span>Expenses</span>
+  </button>
+  <button class="tab-btn" data-tab="summary">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="3.5" height="8"/><rect x="10.3" y="7" width="3.5" height="13"/><rect x="16.6" y="3" width="3.5" height="17"/></svg>
+    <span>Summary</span>
+  </button>
+  <button class="tab-btn" data-tab="settings">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2.1 2.4"/></svg>
+    <span>Workshop Info</span>
+  </button>
+</nav>
+
+<main>
+
+  <!-- ============ NEW ENTRY ============ -->
+  <section class="view active" id="view-entry">
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Vehicle Check-in Photo</h2>
+        <div class="cam-wrap" id="camWrap">
+          <div class="cam-placeholder" id="camPlaceholder">Camera not started.<br>Click "Start Camera" below.</div>
+        </div>
+        <div class="live-stamp" id="liveStamp" style="display:none;"></div>
+        <div class="cam-actions">
+          <button class="btn" id="btnStartCam">Start Camera</button>
+          <button class="btn primary" id="btnCapture" disabled>Capture Photo</button>
+          <button class="btn ghost" id="btnRetake" style="display:none;">Retake</button>
+        </div>
+        <div class="checkbox-line">
+          <input type="checkbox" id="noCam"> <label style="margin:0;text-transform:none;font-weight:400;">No camera available — skip photo for this entry</label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Job Details</h2>
+        <label>Plate Number</label>
+        <input type="text" id="fPlate" class="mono-input" placeholder="e.g. DXB A 12345">
+
+        <label>Work Description</label>
+        <textarea id="fWork" placeholder="Describe the job — e.g. oil change, brake pad replacement..."></textarea>
+
+        <label>Parts &amp; Materials Used</label>
+        <div class="parts-box">
+          <div id="partsList"></div>
+          <button class="btn ghost small" id="btnAddPart" type="button" style="margin-top:4px;">+ Add Part / Material</button>
+          <div class="parts-subtotal"><span>Materials Subtotal</span><b id="materialsSubtotal">AED 0.00</b></div>
+        </div>
+
+        <label>Labour Charges (AED)</label>
+        <input type="number" id="fLabour" class="mono-input" min="0" step="0.01" value="0">
+
+        <div class="total-line">
+          <span>Total</span>
+          <span class="amt" id="fTotalPreview">AED 0.00</span>
+        </div>
+
+        <div class="cam-actions" style="margin-top:18px;">
+          <button class="btn primary" id="btnSaveEntry">Save Entry</button>
+          <button class="btn ghost" id="btnClearEntry">Clear</button>
+        </div>
+        <p class="hint">Saved entries appear under "Job Records" where you can generate a printable invoice.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RECORDS ============ -->
+  <section class="view" id="view-records">
+    <div class="panel">
+      <h2>Search Job Records</h2>
+      <div class="search-bar">
+        <div class="field"><label>From</label><input type="date" id="recFrom"></div>
+        <div class="field"><label>To</label><input type="date" id="recTo"></div>
+        <div class="field"><label>Plate contains</label><input type="text" id="recPlate" placeholder="e.g. 12345"></div>
+        <div class="field"><button class="btn" id="btnRecFilter">Filter</button></div>
+        <div class="field"><button class="btn ghost" id="btnRecReset">Reset</button></div>
+      </div>
+
+      <table>
+        <thead><tr>
+          <th>Photo</th><th>Invoice #</th><th>Date / Time</th><th>Plate</th>
+          <th>Work</th><th>Materials</th><th>Labour</th><th>Total</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="recordsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ EXPENSES ============ -->
+  <section class="view" id="view-expenses">
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Add Expense</h2>
+        <label>Amount (AED)</label>
+        <input type="number" id="expAmount" class="mono-input" min="0" step="0.01" value="0">
+        <label>Description</label>
+        <textarea id="expDesc" placeholder="e.g. parts supplier payment, electricity bill..."></textarea>
+        <div class="cam-actions" style="margin-top:16px;">
+          <button class="btn primary" id="btnAddExpense">Add Expense</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Search Expenses</h2>
+        <div class="search-bar" style="margin-bottom:0;">
+          <div class="field"><label>From</label><input type="date" id="expFrom"></div>
+          <div class="field"><label>To</label><input type="date" id="expTo"></div>
+          <div class="field"><button class="btn" id="btnExpFilter">Filter</button></div>
+          <div class="field"><button class="btn ghost" id="btnExpReset">Reset</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Expense Records</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Actions</th></tr></thead>
+        <tbody id="expensesBody"></tbody>
+      </table>
+      <div class="total-line"><span>Total Expenses</span><span class="amt" id="expTotalDisplay">AED 0.00</span></div>
+    </div>
+  </section>
+
+  <!-- ============ SUMMARY ============ -->
+  <section class="view" id="view-summary">
+    <div class="panel">
+      <h2>Summary Range</h2>
+      <div class="search-bar">
+        <div class="field"><label>From</label><input type="date" id="sumFrom"></div>
+        <div class="field"><label>To</label><input type="date" id="sumTo"></div>
+        <div class="field"><button class="btn" id="btnSumFilter">Apply</button></div>
+        <div class="field"><button class="btn ghost" id="btnSumReset">All Time</button></div>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="label">Jobs Completed</div><div class="value" id="sumJobs">0</div></div>
+        <div class="card"><div class="label">Materials Total</div><div class="value" id="sumMaterials">0.00</div></div>
+        <div class="card"><div class="label">Labour Total</div><div class="value" id="sumLabour">0.00</div></div>
+        <div class="card pos"><div class="label">Revenue Total</div><div class="value" id="sumRevenue">0.00</div></div>
+        <div class="card neg"><div class="label">Expenses Total</div><div class="value" id="sumExpenses">0.00</div></div>
+        <div class="card" id="sumNetCard"><div class="label">Net Profit</div><div class="value" id="sumNet">0.00</div></div>
+      </div>
+
+      <div class="export-row">
+        <button class="btn primary" id="btnSumPrint">Print Summary</button>
+        <button class="btn" id="btnSumPdf">Save as PDF</button>
+        <button class="btn ghost" id="btnSumBackup">Export Backup (JSON)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section class="view" id="view-settings">
+    <div class="panel">
+      <h2>Workshop Information</h2>
+      <p class="settings-note">This appears on the header of every printed invoice and summary report.</p>
+
+      <label>Workshop Name</label>
+      <input type="text" id="setName" value="Prime Car Center">
+
+      <label>Address</label>
+      <textarea id="setAddress" placeholder="e.g. Shop 4, Al Rigga Road, Deira, Dubai, UAE"></textarea>
+
+      <div class="row-2">
+        <div>
+          <label>Phone Number</label>
+          <input type="text" id="setPhone" class="mono-input" placeholder="e.g. +971 4 123 4567">
+        </div>
+        <div>
+          <label>Email (optional)</label>
+          <input type="text" id="setEmail" placeholder="e.g. info@primecarcenter.ae">
+        </div>
+      </div>
+
+      <label>Trade License / VAT No. (optional)</label>
+      <input type="text" id="setLicense" class="mono-input" placeholder="e.g. TRN 100123456700003">
+
+      <div class="cam-actions" style="margin-top:18px;">
+        <button class="btn primary" id="btnSaveSettings">Save Workshop Info</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Invoice quick-view modal -->
+<div class="modal-overlay" id="invoiceModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeModal">&times;</button>
+    <h3>Invoice Preview</h3>
+    <div id="invoicePreviewBody"></div>
+    <div class="cam-actions" style="margin-top:16px;">
+      <button class="btn primary" id="btnOpenInvoice">Print / Save PDF</button>
+      <button class="btn danger" id="btnDeleteEntry">Delete Entry</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+const LS_ENTRIES = 'pcc_entries';
+const LS_EXPENSES = 'pcc_expenses';
+const LS_SETTINGS = 'pcc_settings';
+
+function loadEntries(){ return JSON.parse(localStorage.getItem(LS_ENTRIES) || '[]'); }
+function saveEntries(list){ localStorage.setItem(LS_ENTRIES, JSON.stringify(list)); }
+function loadExpenses(){ return JSON.parse(localStorage.getItem(LS_EXPENSES) || '[]'); }
+function saveExpenses(list){ localStorage.setItem(LS_EXPENSES, JSON.stringify(list)); }
+
+const DEFAULT_SETTINGS = {
+  name: 'Prime Car Center',
+  address: '',
+  phone: '',
+  email: '',
+  license: ''
+};
+function loadSettings(){ return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem(LS_SETTINGS) || '{}')); }
+function saveSettingsToStorage(s){ localStorage.setItem(LS_SETTINGS, JSON.stringify(s)); }
+
+function populateSettingsForm(){
+  const s = loadSettings();
+  document.getElementById('setName').value = s.name;
+  document.getElementById('setAddress').value = s.address;
+  document.getElementById('setPhone').value = s.phone;
+  document.getElementById('setEmail').value = s.email;
+  document.getElementById('setLicense').value = s.license;
+}
+document.getElementById('btnSaveSettings').addEventListener('click', ()=>{
+  const s = {
+    name: document.getElementById('setName').value.trim() || 'Prime Car Center',
+    address: document.getElementById('setAddress').value.trim(),
+    phone: document.getElementById('setPhone').value.trim(),
+    email: document.getElementById('setEmail').value.trim(),
+    license: document.getElementById('setLicense').value.trim()
+  };
+  saveSettingsToStorage(s);
+  toast('Workshop info saved.');
+});
+
+function money(n){ return 'AED ' + (Number(n)||0).toFixed(2); }
+function moneyPlain(n){ return (Number(n)||0).toFixed(2); }
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   TABS
+============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='records') renderRecords();
+    if(btn.dataset.tab==='expenses') renderExpenses();
+    if(btn.dataset.tab==='summary') renderSummary();
+    if(btn.dataset.tab==='settings') populateSettingsForm();
+  });
+});
+
+/* ============================================================
+   CAMERA
+============================================================ */
+let stream = null;
+let capturedPhoto = null;
+const camWrap = document.getElementById('camWrap');
+const camPlaceholder = document.getElementById('camPlaceholder');
+const liveStamp = document.getElementById('liveStamp');
+let stampTimer = null;
+let videoEl = null;
+
+function fmtStamp(d){
+  const pad = n => String(n).padStart(2,'0');
+  return `PCC WORKSHOP · ${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+document.getElementById('btnStartCam').addEventListener('click', async ()=>{
+  if(document.getElementById('noCam').checked){
+    toast('Uncheck "No camera" to start the camera.');
+    return;
+  }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    camWrap.innerHTML = '';
+    videoEl = document.createElement('video');
+    videoEl.autoplay = true; videoEl.playsInline = true;
+    videoEl.srcObject = stream;
+    camWrap.appendChild(videoEl);
+    liveStamp.style.display = 'block';
+    stampTimer = setInterval(()=>{ liveStamp.textContent = fmtStamp(new Date()); }, 1000);
+    document.getElementById('btnCapture').disabled = false;
+  }catch(err){
+    camPlaceholder.textContent = 'Camera unavailable or permission denied.';
+    toast('Could not access camera — check browser permissions.');
+  }
+});
+
+document.getElementById('btnCapture').addEventListener('click', ()=>{
+  if(!videoEl) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = videoEl.videoWidth || 640;
+  canvas.height = videoEl.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+
+  const stampText = fmtStamp(new Date());
+  const padY = Math.max(28, canvas.height*0.06);
+  ctx.font = `${Math.max(14,canvas.width*0.028)}px 'Roboto Mono', monospace`;
+  const textW = ctx.measureText(stampText).width;
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(10, canvas.height - padY - 10, textW + 20, padY);
+  ctx.fillStyle = '#ff8a4c';
+  ctx.fillRect(10, canvas.height - padY - 10, 4, padY);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(stampText, 24, canvas.height - padY/2 - 10 + 6);
+
+  capturedPhoto = canvas.toDataURL('image/jpeg', 0.85);
+
+  camWrap.innerHTML = '';
+  const img = document.createElement('img');
+  img.src = capturedPhoto;
+  camWrap.appendChild(img);
+
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); }
+  liveStamp.style.display = 'none';
+  clearInterval(stampTimer);
+  document.getElementById('btnCapture').disabled = true;
+  document.getElementById('btnRetake').style.display = 'inline-flex';
+  toast('Photo captured with timestamp.');
+});
+
+document.getElementById('btnRetake').addEventListener('click', ()=>{
+  capturedPhoto = null;
+  camWrap.innerHTML = '<div class="cam-placeholder">Camera not started.<br>Click "Start Camera" below.</div>';
+  document.getElementById('btnRetake').style.display = 'none';
+  document.getElementById('btnCapture').disabled = true;
+});
+
+/* ============================================================
+   ENTRY FORM
+============================================================ */
+const fLabour = document.getElementById('fLabour');
+const partsList = document.getElementById('partsList');
+let partRowId = 0;
+
+function addPartRow(name='', cost=''){
+  const rowId = 'part-' + (partRowId++);
+  const row = document.createElement('div');
+  row.className = 'part-row';
+  row.dataset.rowId = rowId;
+  row.innerHTML = `
+    <input type="text" class="part-name" placeholder="Part / material name (e.g. Brake Pad Set)" value="${escapeHtml(name)}">
+    <input type="number" class="part-cost mono-input" placeholder="Cost" min="0" step="0.01" value="${cost}">
+    <button type="button" class="btn-remove-part" title="Remove">&times;</button>
+  `;
+  row.querySelector('.part-name').addEventListener('input', updateTotalPreview);
+  row.querySelector('.part-cost').addEventListener('input', updateTotalPreview);
+  row.querySelector('.btn-remove-part').addEventListener('click', ()=>{
+    row.remove();
+    updateTotalPreview();
+  });
+  partsList.appendChild(row);
+}
+
+document.getElementById('btnAddPart').addEventListener('click', ()=>addPartRow());
+
+function getPartsFromForm(){
+  return Array.from(partsList.querySelectorAll('.part-row')).map(row=>({
+    name: row.querySelector('.part-name').value.trim(),
+    cost: parseFloat(row.querySelector('.part-cost').value) || 0
+  }));
+}
+
+function updateTotalPreview(){
+  const parts = getPartsFromForm();
+  const materials = parts.reduce((s,p)=>s+p.cost, 0);
+  document.getElementById('materialsSubtotal').textContent = money(materials);
+  const t = materials + (parseFloat(fLabour.value)||0);
+  document.getElementById('fTotalPreview').textContent = money(t);
+}
+fLabour.addEventListener('input', updateTotalPreview);
+
+document.getElementById('btnClearEntry').addEventListener('click', clearEntryForm);
+function clearEntryForm(){
+  document.getElementById('fPlate').value = '';
+  document.getElementById('fWork').value = '';
+  partsList.innerHTML = '';
+  addPartRow();
+  fLabour.value = 0;
+  updateTotalPreview();
+  capturedPhoto = null;
+  camWrap.innerHTML = '<div class="cam-placeholder">Camera not started.<br>Click "Start Camera" below.</div>';
+  document.getElementById('btnRetake').style.display = 'none';
+  document.getElementById('btnCapture').disabled = true;
+}
+
+document.getElementById('btnSaveEntry').addEventListener('click', ()=>{
+  const plate = document.getElementById('fPlate').value.trim();
+  const work = document.getElementById('fWork').value.trim();
+  const parts = getPartsFromForm().filter(p=>p.name || p.cost>0);
+  const materials = parts.reduce((s,p)=>s+p.cost, 0);
+  const labour = parseFloat(fLabour.value)||0;
+  const noCam = document.getElementById('noCam').checked;
+
+  if(!plate){ toast('Please enter the plate number.'); return; }
+  if(!work){ toast('Please add a work description.'); return; }
+  if(!capturedPhoto && !noCam){ toast('Capture a photo, or check "No camera available".'); return; }
+
+  const entries = loadEntries();
+  const invoiceNo = 'PCC-INV-' + String(entries.length + 1).padStart(4,'0');
+  const now = new Date();
+
+  entries.push({
+    id: Date.now(),
+    invoiceNo,
+    plate,
+    work,
+    parts,
+    materials,
+    labour,
+    total: materials + labour,
+    photo: capturedPhoto,
+    timestamp: now.toISOString()
+  });
+  saveEntries(entries);
+  toast('Entry saved as ' + invoiceNo);
+  clearEntryForm();
+});
+
+/* ============================================================
+   RECORDS
+============================================================ */
+function renderRecords(){
+  const from = document.getElementById('recFrom').value;
+  const to = document.getElementById('recTo').value;
+  const plateQ = document.getElementById('recPlate').value.trim().toLowerCase();
+
+  let entries = loadEntries().slice().sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
+
+  entries = entries.filter(e=>{
+    const d = e.timestamp.slice(0,10);
+    if(from && d < from) return false;
+    if(to && d > to) return false;
+    if(plateQ && !e.plate.toLowerCase().includes(plateQ)) return false;
+    return true;
+  });
+
+  const body = document.getElementById('recordsBody');
+  if(entries.length === 0){
+    body.innerHTML = '<tr class="empty-row"><td colspan="9">No job records match this search.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = entries.map(e=>{
+    const dt = new Date(e.timestamp);
+    const dtStr = dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    return `<tr>
+      <td class="cell-photo">${e.photo ? `<img class="thumb" src="${e.photo}">` : '—'}</td>
+      <td data-label="Invoice #" class="mono">${e.invoiceNo}</td>
+      <td data-label="Date / Time">${dtStr}</td>
+      <td data-label="Plate"><span class="plate-chip">${escapeHtml(e.plate)}</span></td>
+      <td data-label="Work">${escapeHtml(truncate(e.work,40))}</td>
+      <td data-label="Materials" class="mono">${moneyPlain(e.materials)}</td>
+      <td data-label="Labour" class="mono">${moneyPlain(e.labour)}</td>
+      <td data-label="Total" class="mono"><b>${moneyPlain(e.total)}</b></td>
+      <td class="cell-actions"><button class="btn small" onclick="openInvoiceModal(${e.id})">Invoice</button></td>
+    </tr>`;
+  }).join('');
+}
+function truncate(s,n){ return s.length>n ? s.slice(0,n-1)+'…' : s; }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+document.getElementById('btnRecFilter').addEventListener('click', renderRecords);
+document.getElementById('btnRecReset').addEventListener('click', ()=>{
+  document.getElementById('recFrom').value='';
+  document.getElementById('recTo').value='';
+  document.getElementById('recPlate').value='';
+  renderRecords();
+});
+
+/* ---- Invoice modal ---- */
+let currentInvoiceId = null;
+function openInvoiceModal(id){
+  const e = loadEntries().find(x=>x.id===id);
+  if(!e) return;
+  currentInvoiceId = id;
+  const dt = new Date(e.timestamp);
+  const partsRows = (e.parts && e.parts.length)
+    ? e.parts.map(p=>`<div style="display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0;"><span>${escapeHtml(p.name||'Part')}</span><span class="mono">${moneyPlain(p.cost)}</span></div>`).join('')
+    : '<div style="font-size:13px;color:var(--ink-soft);">No parts itemized.</div>';
+  document.getElementById('invoicePreviewBody').innerHTML = `
+    <p class="mono" style="margin:0 0 4px;color:var(--ink-soft);">${e.invoiceNo}</p>
+    ${e.photo ? `<img src="${e.photo}" style="width:100%;border-radius:6px;border:1px solid var(--line);margin-bottom:10px;">` : ''}
+    <p><b>Plate:</b> <span class="plate-chip">${escapeHtml(e.plate)}</span></p>
+    <p><b>Date:</b> ${dt.toLocaleString()}</p>
+    <p><b>Work:</b> ${escapeHtml(e.work)}</p>
+    <p style="margin-bottom:4px;"><b>Parts &amp; Materials:</b></p>
+    <div style="border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-bottom:8px;">${partsRows}</div>
+    <p><b>Materials Subtotal:</b> ${money(e.materials)}</p>
+    <p><b>Labour:</b> ${money(e.labour)}</p>
+    <p style="font-size:17px;"><b>Total:</b> ${money(e.total)}</p>
+  `;
+  document.getElementById('invoiceModal').classList.add('active');
+}
+document.getElementById('closeModal').addEventListener('click', ()=>{
+  document.getElementById('invoiceModal').classList.remove('active');
+});
+document.getElementById('btnDeleteEntry').addEventListener('click', ()=>{
+  if(!currentInvoiceId) return;
+  if(!confirm('Delete this job record permanently?')) return;
+  let entries = loadEntries().filter(e=>e.id!==currentInvoiceId);
+  saveEntries(entries);
+  document.getElementById('invoiceModal').classList.remove('active');
+  renderRecords();
+  toast('Entry deleted.');
+});
+document.getElementById('btnOpenInvoice').addEventListener('click', ()=>{
+  if(!currentInvoiceId) return;
+  const e = loadEntries().find(x=>x.id===currentInvoiceId);
+  printInvoice(e);
+});
+
+function printInvoice(e){
+  const dt = new Date(e.timestamp);
+  const s = loadSettings();
+  const contactLines = [s.address, [s.phone?('Tel: '+s.phone):'', s.email||''].filter(Boolean).join('  ·  '), s.license?('TRN/License: '+s.license):'']
+    .filter(Boolean).map(l=>`<div>${escapeHtml(l)}</div>`).join('');
+
+  const partsTableRows = (e.parts && e.parts.length)
+    ? e.parts.map(p=>`<tr><td>${escapeHtml(p.name||'Part / Material')}</td><td style="text-align:right;">${moneyPlain(p.cost)}</td></tr>`).join('')
+    : `<tr><td colspan="2" style="color:#999;font-style:italic;">No parts itemized</td></tr>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(`
+  <html><head><title>${e.invoiceNo}</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;color:#1b1f24;padding:36px;max-width:640px;margin:0 auto;}
+    .top{display:flex;align-items:center;gap:14px;border-bottom:4px solid #e8590c;padding-bottom:14px;margin-bottom:10px;}
+    .hex{width:52px;height:52px;flex-shrink:0;background:#e8590c;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:flex;align-items:center;justify-content:center;color:#1b1f24;font-weight:bold;font-size:14px;border:2px solid #1b1f24;}
+    h1{font-size:20px;margin:0;text-transform:uppercase;}
+    .sub{color:#5b6570;font-size:12px;margin-top:2px;}
+    .contact{font-size:11.5px;color:#5b6570;line-height:1.5;margin-bottom:18px;}
+    .stub{border:1px dashed #999;border-radius:8px;padding:16px;margin-bottom:14px;}
+    .row{display:flex;justify-content:space-between;margin:6px 0;font-size:14px;}
+    .label{color:#5b6570;}
+    .plate{font-family:'Courier New',monospace;font-weight:bold;border:2px solid #1b1f24;padding:2px 8px;border-radius:4px;}
+    img{width:100%;border-radius:6px;margin-bottom:14px;border:1px solid #ddd;}
+    h3.section{font-size:12px;text-transform:uppercase;color:#5b6570;border-left:3px solid #e8590c;padding-left:8px;margin:18px 0 6px;}
+    table{width:100%;border-collapse:collapse;margin-top:4px;}
+    td{padding:7px 0;border-bottom:1px solid #eee;font-size:13.5px;}
+    .totals td{font-size:14px;}
+    .total-row td{font-weight:bold;font-size:17px;border-top:2px solid #1b1f24;border-bottom:none;padding-top:10px;}
+    .foot{margin-top:26px;text-align:center;color:#999;font-size:11px;}
+    @media print{ .noprint{display:none;} }
+  </style></head>
+  <body>
+    <div class="top">
+      <div class="hex">PCC</div>
+      <div><h1>${escapeHtml(s.name)}</h1><div class="sub">Workshop Job Invoice</div></div>
+    </div>
+    <div class="contact">${contactLines}</div>
+
+    <div class="row"><span class="label">Invoice No.</span><b>${e.invoiceNo}</b></div>
+    <div class="row"><span class="label">Date / Time</span><span>${dt.toLocaleString()}</span></div>
+    <div class="row"><span class="label">Vehicle Plate</span><span class="plate">${escapeHtml(e.plate)}</span></div>
+    ${e.photo ? `<img src="${e.photo}">` : ''}
+    <div class="stub">
+      <div class="row"><span class="label">Work Description</span></div>
+      <p style="margin:4px 0 0;">${escapeHtml(e.work)}</p>
+    </div>
+
+    <h3 class="section">Parts &amp; Materials</h3>
+    <table>${partsTableRows}</table>
+
+    <h3 class="section">Charges</h3>
+    <table class="totals">
+      <tr><td>Materials Subtotal</td><td style="text-align:right;">${money(e.materials)}</td></tr>
+      <tr><td>Labour Charges</td><td style="text-align:right;">${money(e.labour)}</td></tr>
+      <tr class="total-row"><td>Total Due</td><td style="text-align:right;">${money(e.total)}</td></tr>
+    </table>
+    <div class="foot">Thank you for choosing ${escapeHtml(s.name)} · This is a system-generated invoice</div>
+    <div class="noprint" style="text-align:center;margin-top:20px;">
+      <button onclick="window.print()" style="padding:10px 22px;font-size:14px;cursor:pointer;">Print / Save as PDF</button>
+    </div>
+  </body></html>`);
+  w.document.close();
+}
+
+/* ============================================================
+   EXPENSES
+============================================================ */
+document.getElementById('btnAddExpense').addEventListener('click', ()=>{
+  const amount = parseFloat(document.getElementById('expAmount').value)||0;
+  const desc = document.getElementById('expDesc').value.trim();
+  if(amount<=0){ toast('Enter a valid amount.'); return; }
+  if(!desc){ toast('Enter a description.'); return; }
+  const list = loadExpenses();
+  list.push({ id: Date.now(), amount, desc, date: new Date().toISOString() });
+  saveExpenses(list);
+  document.getElementById('expAmount').value = 0;
+  document.getElementById('expDesc').value = '';
+  toast('Expense added.');
+  renderExpenses();
+});
+
+function renderExpenses(){
+  const from = document.getElementById('expFrom').value;
+  const to = document.getElementById('expTo').value;
+  let list = loadExpenses().slice().sort((a,b)=> new Date(b.date) - new Date(a.date));
+  list = list.filter(x=>{
+    const d = x.date.slice(0,10);
+    if(from && d < from) return false;
+    if(to && d > to) return false;
+    return true;
+  });
+  const body = document.getElementById('expensesBody');
+  if(list.length===0){
+    body.innerHTML = '<tr class="empty-row"><td colspan="4">No expenses match this search.</td></tr>';
+  } else {
+    body.innerHTML = list.map(x=>`<tr>
+      <td data-label="Date">${new Date(x.date).toLocaleDateString()}</td>
+      <td data-label="Description">${escapeHtml(x.desc)}</td>
+      <td data-label="Amount" class="mono">${moneyPlain(x.amount)}</td>
+      <td class="cell-actions"><button class="btn small danger" onclick="deleteExpense(${x.id})">Delete</button></td>
+    </tr>`).join('');
+  }
+  const total = list.reduce((s,x)=>s+x.amount,0);
+  document.getElementById('expTotalDisplay').textContent = money(total);
+}
+function deleteExpense(id){
+  if(!confirm('Delete this expense?')) return;
+  saveExpenses(loadExpenses().filter(x=>x.id!==id));
+  renderExpenses();
+  toast('Expense deleted.');
+}
+document.getElementById('btnExpFilter').addEventListener('click', renderExpenses);
+document.getElementById('btnExpReset').addEventListener('click', ()=>{
+  document.getElementById('expFrom').value='';
+  document.getElementById('expTo').value='';
+  renderExpenses();
+});
+
+/* ============================================================
+   SUMMARY
+============================================================ */
+function getSummaryData(from, to){
+  let entries = loadEntries().filter(e=>{
+    const d = e.timestamp.slice(0,10);
+    if(from && d<from) return false;
+    if(to && d>to) return false;
+    return true;
+  });
+  let expenses = loadExpenses().filter(x=>{
+    const d = x.date.slice(0,10);
+    if(from && d<from) return false;
+    if(to && d>to) return false;
+    return true;
+  });
+  const materials = entries.reduce((s,e)=>s+e.materials,0);
+  const labour = entries.reduce((s,e)=>s+e.labour,0);
+  const revenue = materials + labour;
+  const expTotal = expenses.reduce((s,x)=>s+x.amount,0);
+  return { entries, expenses, materials, labour, revenue, expTotal, net: revenue - expTotal, jobs: entries.length };
+}
+
+function renderSummary(){
+  const from = document.getElementById('sumFrom').value;
+  const to = document.getElementById('sumTo').value;
+  const d = getSummaryData(from, to);
+  document.getElementById('sumJobs').textContent = d.jobs;
+  document.getElementById('sumMaterials').textContent = moneyPlain(d.materials);
+  document.getElementById('sumLabour').textContent = moneyPlain(d.labour);
+  document.getElementById('sumRevenue').textContent = moneyPlain(d.revenue);
+  document.getElementById('sumExpenses').textContent = moneyPlain(d.expTotal);
+  document.getElementById('sumNet').textContent = moneyPlain(d.net);
+  const netCard = document.getElementById('sumNetCard');
+  netCard.classList.remove('pos','neg');
+  netCard.classList.add(d.net>=0 ? 'pos' : 'neg');
+}
+document.getElementById('btnSumFilter').addEventListener('click', renderSummary);
+document.getElementById('btnSumReset').addEventListener('click', ()=>{
+  document.getElementById('sumFrom').value='';
+  document.getElementById('sumTo').value='';
+  renderSummary();
+});
+
+document.getElementById('btnSumPrint').addEventListener('click', ()=>printSummary(false));
+document.getElementById('btnSumPdf').addEventListener('click', ()=>printSummary(true));
+
+function printSummary(){
+  const from = document.getElementById('sumFrom').value;
+  const to = document.getElementById('sumTo').value;
+  const d = getSummaryData(from, to);
+  const rangeLabel = (from||to) ? `${from||'Start'} to ${to||'Today'}` : 'All Time';
+  const s = loadSettings();
+  const contactLines = [s.address, [s.phone?('Tel: '+s.phone):'', s.email||''].filter(Boolean).join('  ·  ')]
+    .filter(Boolean).map(l=>escapeHtml(l)).join(' &nbsp;|&nbsp; ');
+
+  const w = window.open('', '_blank');
+  w.document.write(`
+  <html><head><title>PCC Summary Report</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;color:#1b1f24;padding:36px;max-width:720px;margin:0 auto;}
+    .top{display:flex;align-items:center;gap:14px;border-bottom:4px solid #e8590c;padding-bottom:10px;margin-bottom:6px;}
+    .hex{width:46px;height:46px;background:#e8590c;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:flex;align-items:center;justify-content:center;color:#1b1f24;font-weight:bold;font-size:13px;border:2px solid #1b1f24;}
+    h1{font-size:20px;margin:0;text-transform:uppercase;}
+    .sub{color:#5b6570;font-size:12px;margin-top:2px;}
+    .contact{font-size:11px;color:#5b6570;margin-bottom:18px;}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+    .card{background:#1b1f24;color:#fff;padding:12px 14px;border-radius:6px;border-bottom:3px solid #e8590c;}
+    .card .l{font-size:10.5px;text-transform:uppercase;color:#aab4bf;}
+    .card .v{font-size:18px;font-weight:bold;margin-top:4px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}
+    th{text-align:left;font-size:11px;text-transform:uppercase;color:#5b6570;padding:6px;border-bottom:2px solid #1b1f24;}
+    td{padding:7px 6px;border-bottom:1px solid #eee;}
+    h3{margin-top:26px;font-size:14px;text-transform:uppercase;border-left:4px solid #e8590c;padding-left:8px;}
+    .foot{margin-top:26px;text-align:center;color:#999;font-size:11px;}
+    @media print{ .noprint{display:none;} }
+  </style></head>
+  <body>
+    <div class="top">
+      <div class="hex">PCC</div>
+      <div><h1>${escapeHtml(s.name)}</h1><div class="sub">Summary Report — ${rangeLabel}</div></div>
+    </div>
+    <div class="contact">${contactLines}</div>
+    <div class="cards">
+      <div class="card"><div class="l">Jobs</div><div class="v">${d.jobs}</div></div>
+      <div class="card"><div class="l">Materials</div><div class="v">${moneyPlain(d.materials)}</div></div>
+      <div class="card"><div class="l">Labour</div><div class="v">${moneyPlain(d.labour)}</div></div>
+      <div class="card"><div class="l">Revenue</div><div class="v">${moneyPlain(d.revenue)}</div></div>
+      <div class="card"><div class="l">Expenses</div><div class="v">${moneyPlain(d.expTotal)}</div></div>
+      <div class="card"><div class="l">Net Profit</div><div class="v">${moneyPlain(d.net)}</div></div>
+    </div>
+
+    <h3>Job Records</h3>
+    <table><thead><tr><th>Invoice</th><th>Plate</th><th>Materials</th><th>Labour</th><th>Total</th></tr></thead>
+    <tbody>
+      ${d.entries.map(e=>`<tr><td>${e.invoiceNo}</td><td>${escapeHtml(e.plate)}</td><td>${moneyPlain(e.materials)}</td><td>${moneyPlain(e.labour)}</td><td>${moneyPlain(e.total)}</td></tr>`).join('') || '<tr><td colspan="5">No records in this range.</td></tr>'}
+    </tbody></table>
+
+    <h3>Expenses</h3>
+    <table><thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead>
+    <tbody>
+      ${d.expenses.map(x=>`<tr><td>${new Date(x.date).toLocaleDateString()}</td><td>${escapeHtml(x.desc)}</td><td>${moneyPlain(x.amount)}</td></tr>`).join('') || '<tr><td colspan="3">No expenses in this range.</td></tr>'}
+    </tbody></table>
+
+    <div class="foot">Generated by Prime Car Center Workshop System · ${new Date().toLocaleString()}</div>
+    <div class="noprint" style="text-align:center;margin-top:20px;">
+      <button onclick="window.print()" style="padding:10px 22px;font-size:14px;cursor:pointer;">Print / Save as PDF</button>
+    </div>
+  </body></html>`);
+  w.document.close();
+}
+
+document.getElementById('btnSumBackup').addEventListener('click', ()=>{
+  const data = { entries: loadEntries(), expenses: loadExpenses(), exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'pcc-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup file downloaded.');
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+addPartRow();
+updateTotalPreview();
+renderRecords();
+renderExpenses();
+renderSummary();
+populateSettingsForm();
+</script>
+</body>
+</html>
