@@ -20,6 +20,8 @@ services:
         value: "*"
       - key: CORS_ALLOW_ALL_ORIGINS
         value: "True"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com,https://getandfix.com,https://app.getandfix.com"
 
 databases:
   - name: prime-car-center-db
