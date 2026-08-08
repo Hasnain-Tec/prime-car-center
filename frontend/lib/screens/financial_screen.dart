@@ -23,6 +23,7 @@ class _FinancialScreenState extends State<FinancialScreen> {
   DateTime? to;
   Map<String, dynamic>? data;
   bool loading = true;
+  String _periodMode = 'all';
 
   @override
   void initState() {
@@ -103,6 +104,7 @@ class _FinancialScreenState extends State<FinancialScreen> {
 
     setState(() {
       from = selected;
+      _periodMode = 'custom';
     });
   }
 
@@ -122,7 +124,30 @@ class _FinancialScreenState extends State<FinancialScreen> {
 
     setState(() {
       to = selected;
+      _periodMode = 'custom';
     });
+  }
+
+  String get _pdfFilename {
+    final now = DateTime.now();
+
+    switch (_periodMode) {
+      case 'day':
+        return 'pcc-daily-report-${DateFormat('yyyy-MM-dd').format(from ?? now)}.pdf';
+      case 'week':
+        return 'pcc-weekly-report-${DateFormat('yyyy-MM-dd').format(from ?? now)}-to-${DateFormat('yyyy-MM-dd').format(to ?? now)}.pdf';
+      case 'month':
+        return 'pcc-monthly-report-${DateFormat('yyyy-MM').format(from ?? now)}.pdf';
+      case 'year':
+        return 'pcc-yearly-report-${(from ?? now).year}.pdf';
+      case 'all':
+        return 'pcc-financial-report-all-time.pdf';
+      default:
+        if (from != null && to != null) {
+          return 'pcc-financial-report-${DateFormat('yyyy-MM-dd').format(from!)}-to-${DateFormat('yyyy-MM-dd').format(to!)}.pdf';
+        }
+        return 'pcc-financial-report.pdf';
+    }
   }
 
   Future<void> _pdf() async {
@@ -134,7 +159,7 @@ class _FinancialScreenState extends State<FinancialScreen> {
 
       await Printing.sharePdf(
         bytes: bytes,
-        filename: 'financial-summary.pdf',
+        filename: _pdfFilename,
       );
     } catch (error) {
       if (mounted) {
@@ -143,16 +168,88 @@ class _FinancialScreenState extends State<FinancialScreen> {
     }
   }
 
+  Future<void> _setToday() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    setState(() {
+      from = today;
+      to = today;
+      _periodMode = 'day';
+    });
+
+    await _load();
+  }
+
+  Future<void> _setThisWeek() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final firstDay = today.subtract(Duration(days: today.weekday - 1));
+
+    setState(() {
+      from = firstDay;
+      to = today;
+      _periodMode = 'week';
+    });
+
+    await _load();
+  }
+
+  Future<void> _setThisMonth() async {
+    final now = DateTime.now();
+    final firstDay = DateTime(now.year, now.month, 1);
+    final lastDay = DateTime(now.year, now.month, now.day);
+
+    setState(() {
+      from = firstDay;
+      to = lastDay;
+      _periodMode = 'month';
+    });
+
+    await _load();
+  }
+
+  Future<void> _setThisYear() async {
+    final now = DateTime.now();
+    final firstDay = DateTime(now.year, 1, 1);
+    final lastDay = DateTime(now.year, now.month, now.day);
+
+    setState(() {
+      from = firstDay;
+      to = lastDay;
+      _periodMode = 'year';
+    });
+
+    await _load();
+  }
+
   void _resetDates() {
     setState(() {
       from = null;
       to = null;
+      _periodMode = 'all';
     });
 
     _load();
   }
 
   String get _rangeText {
+    if (_periodMode == 'day' && from != null) {
+      return 'Daily report · ${DateFormat('dd MMM yyyy').format(from!)}';
+    }
+
+    if (_periodMode == 'week' && from != null && to != null) {
+      return 'Weekly report · ${DateFormat('dd MMM yyyy').format(from!)} — ${DateFormat('dd MMM yyyy').format(to!)}';
+    }
+
+    if (_periodMode == 'month' && from != null) {
+      return 'Monthly report · ${DateFormat('MMMM yyyy').format(from!)}';
+    }
+
+    if (_periodMode == 'year' && from != null) {
+      return 'Yearly report · ${from!.year}';
+    }
+
     if (from == null && to == null) {
       return 'All workshop records';
     }
@@ -283,6 +380,42 @@ class _FinancialScreenState extends State<FinancialScreen> {
         builder: (context, constraints) {
           final mobile = constraints.maxWidth < 650;
 
+          final todayButton = FilledButton.tonalIcon(
+            onPressed: loading ? null : _setToday,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            icon: const Icon(Icons.today_outlined),
+            label: const Text('TODAY'),
+          );
+
+          final weekButton = FilledButton.tonalIcon(
+            onPressed: loading ? null : _setThisWeek,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            icon: const Icon(Icons.date_range_outlined),
+            label: const Text('THIS WEEK'),
+          );
+
+          final monthButton = FilledButton.tonalIcon(
+            onPressed: loading ? null : _setThisMonth,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            icon: const Icon(Icons.calendar_view_month),
+            label: const Text('THIS MONTH'),
+          );
+
+          final yearButton = FilledButton.tonalIcon(
+            onPressed: loading ? null : _setThisYear,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            icon: const Icon(Icons.calendar_month_outlined),
+            label: const Text('THIS YEAR'),
+          );
+
           final fromButton = OutlinedButton.icon(
             onPressed: loading ? null : _selectFromDate,
             style: OutlinedButton.styleFrom(
@@ -351,55 +484,120 @@ class _FinancialScreenState extends State<FinancialScreen> {
               Icons.picture_as_pdf_outlined,
             ),
             label: const Text(
-              'PDF REPORT',
+              'EXPORT PDF',
             ),
           );
 
-          if (mobile) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                fromButton,
-                const SizedBox(height: 10),
-                toButton,
-                const SizedBox(height: 10),
-                applyButton,
-                const SizedBox(height: 10),
-                allTimeButton,
-                if (widget.session.can('finance.export')) ...[
-                  const SizedBox(height: 10),
-                  pdfButton,
-                ],
-              ],
-            );
-          }
-
-          return Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            crossAxisAlignment: WrapCrossAlignment.center,
+          final quickReports = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(
-                width: 190,
-                child: fromButton,
-              ),
-              SizedBox(
-                width: 190,
-                child: toButton,
-              ),
-              SizedBox(
-                width: 130,
-                child: applyButton,
-              ),
-              SizedBox(
-                width: 145,
-                child: allTimeButton,
-              ),
-              if (widget.session.can('finance.export'))
-                SizedBox(
-                  width: 170,
-                  child: pdfButton,
+              const Text(
+                'QUICK REPORTS',
+                style: TextStyle(
+                  color: PccColors.inkSoft,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
                 ),
+              ),
+              const SizedBox(height: 9),
+              if (mobile)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    todayButton,
+                    const SizedBox(height: 8),
+                    weekButton,
+                    const SizedBox(height: 8),
+                    monthButton,
+                    const SizedBox(height: 8),
+                    yearButton,
+                  ],
+                )
+              else
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    SizedBox(width: 150, child: todayButton),
+                    SizedBox(width: 160, child: weekButton),
+                    SizedBox(width: 170, child: monthButton),
+                    SizedBox(width: 160, child: yearButton),
+                  ],
+                ),
+            ],
+          );
+
+          final customRange = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'CUSTOM RANGE',
+                style: TextStyle(
+                  color: PccColors.inkSoft,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 9),
+              if (mobile)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    fromButton,
+                    const SizedBox(height: 10),
+                    toButton,
+                    const SizedBox(height: 10),
+                    applyButton,
+                    const SizedBox(height: 10),
+                    allTimeButton,
+                    if (widget.session.can('finance.export')) ...[
+                      const SizedBox(height: 10),
+                      pdfButton,
+                    ],
+                  ],
+                )
+              else
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 190,
+                      child: fromButton,
+                    ),
+                    SizedBox(
+                      width: 190,
+                      child: toButton,
+                    ),
+                    SizedBox(
+                      width: 130,
+                      child: applyButton,
+                    ),
+                    SizedBox(
+                      width: 145,
+                      child: allTimeButton,
+                    ),
+                    if (widget.session.can('finance.export'))
+                      SizedBox(
+                        width: 170,
+                        child: pdfButton,
+                      ),
+                  ],
+                ),
+            ],
+          );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              quickReports,
+              const SizedBox(height: 18),
+              const Divider(),
+              const SizedBox(height: 14),
+              customRange,
             ],
           );
         },

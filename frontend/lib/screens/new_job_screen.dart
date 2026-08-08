@@ -356,15 +356,9 @@ class _NewJobScreenState extends State<NewJobScreen> {
       return;
     }
 
-    if (_startTime == null || _endTime == null) {
-      showError(
-        context,
-        'Select both the job start time and expected end time.',
-      );
-      return;
-    }
-
-    if (!_endTime!.isAfter(_startTime!)) {
+    if (_startTime != null &&
+        _endTime != null &&
+        !_endTime!.isAfter(_startTime!)) {
       showError(
         context,
         'The expected end time must be after the job start time.',
@@ -412,8 +406,9 @@ class _NewJobScreenState extends State<NewJobScreen> {
           'priority': _priority,
           'internal_notes': _notes.text.trim(),
           if (_dueDate != null) 'due_date': _dueDate!.toIso8601String(),
-          'start_time': _startTime!.toUtc().toIso8601String(),
-          'end_time': _endTime!.toUtc().toIso8601String(),
+          if (_startTime != null)
+            'start_time': _startTime!.toUtc().toIso8601String(),
+          if (_endTime != null) 'end_time': _endTime!.toUtc().toIso8601String(),
           'parts_json': jsonEncode(parts),
         },
         fileBytes: _skipPhoto ? null : _photo,
@@ -980,7 +975,7 @@ class _NewJobScreenState extends State<NewJobScreen> {
       ),
       label: Text(
         _endTime == null
-            ? 'EXPECTED END TIME'
+            ? 'EXPECTED END TIME (OPTIONAL)'
             : DateFormat('dd MMM yyyy, hh:mm a').format(_endTime!),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
