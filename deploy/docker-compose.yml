@@ -1,3 +1,5 @@
+name: prime-car-center
+
 services:
   db:
     image: postgres:17-alpine
@@ -39,14 +41,21 @@ services:
       args:
         API_BASE_URL: /api
     restart: unless-stopped
-    ports:
-      - "80:80"
     depends_on:
       - backend
     volumes:
       - media_data:/var/www/media:ro
+    networks:
+      default:
+      qmsp_gateway:
+        aliases:
+          - pcc_web
 
 volumes:
   postgres_data:
   media_data:
   static_data:
+
+networks:
+  qmsp_gateway:
+    external: true
