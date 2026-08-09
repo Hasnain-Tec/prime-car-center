@@ -236,16 +236,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               ),
               const SizedBox(height: 12),
               TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Category (optional)',
-                  hintText: 'e.g. Electricity, Tools, Supplier',
-                  prefixIcon: Icon(
-                    Icons.category_outlined,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
                 controller: _description,
                 minLines: 3,
                 maxLines: 6,
