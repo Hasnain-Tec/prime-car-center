@@ -178,7 +178,6 @@ def build_invoice_pdf(job):
                 job.created_at.strftime('%d %b %Y, %I:%M %p'),
             ],
             ['Vehicle Plate', job.plate_number],
-            ['Status', job.get_status_display()],
         ],
         colWidths=[40 * mm, 124 * mm],
     )

@@ -24,8 +24,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
   DateTime? _from;
   DateTime? _to;
-  String? _status;
-
   List<ExpenseModel> expenses = [];
 
   bool loading = true;
@@ -55,7 +53,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       final data = await widget.session.api.get(
         'expenses/',
         query: {
-          'status': _status,
           'from':
               _from == null ? null : DateFormat('yyyy-MM-dd').format(_from!),
           'to': _to == null ? null : DateFormat('yyyy-MM-dd').format(_to!),
@@ -123,7 +120,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
       showSuccess(
         context,
-        'Expense submitted for review.',
+        'Expense added successfully.',
       );
 
       await _load();
@@ -136,35 +133,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         setState(() {
           saving = false;
         });
-      }
-    }
-  }
-
-  Future<void> _review(
-    ExpenseModel expense,
-    String status,
-  ) async {
-    try {
-      await widget.session.api.post(
-        'expenses/${expense.id}/review/',
-        body: {
-          'status': status,
-        },
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      showSuccess(
-        context,
-        status == 'approved' ? 'Expense approved.' : 'Expense rejected.',
-      );
-
-      await _load();
-    } catch (error) {
-      if (mounted) {
-        showError(context, error);
       }
     }
   }
@@ -239,7 +207,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     setState(() {
       _from = null;
       _to = null;
-      _status = null;
     });
 
     _load();
@@ -264,6 +231,16 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   labelText: 'Amount (${widget.session.workshop.currency})',
                   prefixIcon: const Icon(
                     Icons.payments_outlined,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Category (optional)',
+                  hintText: 'e.g. Electricity, Tools, Supplier',
+                  prefixIcon: Icon(
+                    Icons.category_outlined,
                   ),
                 ),
               ),
@@ -317,41 +294,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final mobile = constraints.maxWidth < 560;
-
-          final statusField = DropdownButtonFormField<String>(
-            key: ValueKey(_status ?? 'all'),
-            initialValue: _status ?? 'all',
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Status',
-              prefixIcon: Icon(
-                Icons.fact_check_outlined,
-              ),
-            ),
-            items: const [
-              DropdownMenuItem(
-                value: 'all',
-                child: Text('All statuses'),
-              ),
-              DropdownMenuItem(
-                value: 'submitted',
-                child: Text('Submitted'),
-              ),
-              DropdownMenuItem(
-                value: 'approved',
-                child: Text('Approved'),
-              ),
-              DropdownMenuItem(
-                value: 'rejected',
-                child: Text('Rejected'),
-              ),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _status = value == null || value == 'all' ? null : value;
-              });
-            },
-          );
 
           final fromButton = OutlinedButton.icon(
             onPressed: _selectFromDate,
@@ -417,8 +359,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                statusField,
-                const SizedBox(height: 11),
                 fromButton,
                 const SizedBox(height: 11),
                 toButton,
@@ -444,10 +384,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             crossAxisAlignment: WrapCrossAlignment.end,
             children: [
               SizedBox(
-                width: 190,
-                child: statusField,
-              ),
-              SizedBox(
                 width: 185,
                 child: fromButton,
               ),
@@ -464,70 +400,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    final color = _statusColor(status);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: color.withValues(alpha: 0.45),
-        ),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        maxLines: 1,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.3,
-        ),
-      ),
-    );
-  }
-
   Widget _buildExpenseActions(ExpenseModel expense) {
     return Wrap(
       spacing: 3,
       runSpacing: 3,
       alignment: WrapAlignment.end,
       children: [
-        if (widget.session.can('expenses.approve') &&
-            expense.status == 'submitted')
-          IconButton(
-            tooltip: 'Approve',
-            onPressed: () {
-              _review(expense, 'approved');
-            },
-            style: IconButton.styleFrom(
-              backgroundColor: PccColors.success.withValues(alpha: 0.09),
-            ),
-            icon: const Icon(
-              Icons.check_circle_outline,
-              color: PccColors.success,
-            ),
-          ),
-        if (widget.session.can('expenses.approve') &&
-            expense.status == 'submitted')
-          IconButton(
-            tooltip: 'Reject',
-            onPressed: () {
-              _review(expense, 'rejected');
-            },
-            style: IconButton.styleFrom(
-              backgroundColor: PccColors.danger.withValues(alpha: 0.08),
-            ),
-            icon: const Icon(
-              Icons.cancel_outlined,
-              color: PccColors.danger,
-            ),
-          ),
         if (widget.session.can('expenses.delete'))
           IconButton(
             tooltip: 'Delete',
@@ -547,8 +425,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 
   Widget _buildExpenseCard(ExpenseModel expense) {
-    final statusColor = _statusColor(expense.status);
-
     final submittedBy = expense.submittedByName.trim().isEmpty
         ? 'Unknown user'
         : expense.submittedByName.trim();
@@ -566,10 +442,10 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
             final avatar = CircleAvatar(
               radius: mobile ? 22 : 24,
-              backgroundColor: statusColor.withValues(alpha: 0.12),
+              backgroundColor: PccColors.hazard.withValues(alpha: 0.12),
               child: Icon(
                 Icons.receipt_long,
-                color: statusColor,
+                color: PccColors.hazard,
               ),
             );
 
@@ -653,14 +529,10 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                         Expanded(
                           child: amountText,
                         ),
-                        const SizedBox(width: 8),
-                        _buildStatusBadge(expense.status),
                       ],
                     ),
                   ),
-                  if ((widget.session.can('expenses.approve') &&
-                          expense.status == 'submitted') ||
-                      widget.session.can('expenses.delete')) ...[
+                  if (widget.session.can('expenses.delete')) ...[
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
@@ -687,11 +559,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   ),
                   child: amountText,
                 ),
-                const SizedBox(width: 12),
-                _buildStatusBadge(expense.status),
-                if ((widget.session.can('expenses.approve') &&
-                        expense.status == 'submitted') ||
-                    widget.session.can('expenses.delete')) ...[
+                if (widget.session.can('expenses.delete')) ...[
                   const SizedBox(width: 7),
                   _buildExpenseActions(expense),
                 ],
@@ -897,14 +765,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         _buildExpenseRecordsPanel(total),
       ],
     );
-  }
-
-  Color _statusColor(String status) {
-    return switch (status) {
-      'approved' => PccColors.success,
-      'rejected' => PccColors.danger,
-      _ => PccColors.hazard,
-    };
   }
 }
 

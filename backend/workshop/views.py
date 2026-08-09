@@ -327,6 +327,9 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         require_permission(request.user, 'expenses.create')
         response = super().create(request, *args, **kwargs)
         expense = Expense.objects.get(pk=response.data['id'])
+        expense.status = Expense.Status.APPROVED
+        expense.save(update_fields=['status', 'updated_at'])
+        response.data['status'] = Expense.Status.APPROVED
         log_action(request, 'expense_submitted', 'expenses', expense)
         return response
 
@@ -365,31 +368,17 @@ class WorkshopSettingsView(APIView):
 
     def get(self, request):
         obj = WorkshopSettings.get_solo()
-        return Response(
-            WorkshopSettingsSerializer(
-                obj,
-                context={'request': request},
-            ).data
-        )
+        return Response(WorkshopSettingsSerializer(obj, context={'request': request}).data)
 
     def patch(self, request):
         require_permission(request.user, 'settings.manage')
         obj = WorkshopSettings.get_solo()
-        serializer = WorkshopSettingsSerializer(
-            obj,
-            data=request.data,
-            partial=True,
-            context={'request': request},
-        )
+        serializer = WorkshopSettingsSerializer(obj, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save(updated_by=request.user)
-        log_action(
-            request,
-            'workshop_settings_updated',
-            'administration',
-            obj,
-        )
+        log_action(request, 'workshop_settings_updated', 'administration', obj)
         return Response(serializer.data)
+
 
 class FinancialSummaryView(APIView):
     def get(self, request):

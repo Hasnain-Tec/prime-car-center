@@ -181,7 +181,52 @@ class _NewJobScreenState extends State<NewJobScreen> {
     Uint8List bytes,
     DateTime capturedAt,
   ) async {
-    final codec = await ui.instantiateImageCodec(bytes);
+    const maxPhotoBytes = 300 * 1024;
+
+    const targetWidths = <int>[
+      1000,
+      900,
+      800,
+      700,
+      600,
+      520,
+      440,
+      360,
+      300,
+      240,
+      180,
+    ];
+
+    Uint8List? lastResult;
+
+    for (final targetWidth in targetWidths) {
+      final result = await _renderStampedPhoto(
+        bytes,
+        capturedAt,
+        targetWidth,
+      );
+
+      lastResult = result;
+
+      if (result.lengthInBytes <= maxPhotoBytes) {
+        return result;
+      }
+    }
+
+    return lastResult!;
+  }
+
+  Future<Uint8List> _renderStampedPhoto(
+    Uint8List bytes,
+    DateTime capturedAt,
+    int targetWidth,
+  ) async {
+    final codec = await ui.instantiateImageCodec(
+      bytes,
+      targetWidth: targetWidth,
+      allowUpscaling: false,
+    );
+
     final frame = await codec.getNextFrame();
     final source = frame.image;
 
